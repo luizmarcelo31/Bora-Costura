@@ -103,6 +103,8 @@ const LOCAL_DEV_ORIGINS: string[] = [
   "http://127.0.0.1:8080",
   "http://[::1]:8080",
 ];
+const PRODUCTION_ORIGINS = ["https://bora-costura.vercel.app"];
+const betterAuthApiKey = env("BETTER_AUTH_API_KEY");
 const baseURL = explicitBaseURL ?? {
   // Include loopback hosts so dynamic baseURL resolves for local email/password
   // (not only the preview wildcard).
@@ -128,6 +130,7 @@ const trustedOrigins: string[] = Array.from(
           explicitBaseURL.replace(/\/$/, ""),
           ...(vercelOrigin ? [vercelOrigin] : []),
           ...configuredTrustedOrigins,
+          ...PRODUCTION_ORIGINS,
           ...LOCAL_DEV_ORIGINS,
         ]
       : [
@@ -137,6 +140,7 @@ const trustedOrigins: string[] = Array.from(
           ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
           ...(vercelOrigin ? [vercelOrigin] : []),
           ...configuredTrustedOrigins,
+          ...PRODUCTION_ORIGINS,
           ...LOCAL_DEV_ORIGINS,
         ],
   ),
@@ -193,7 +197,7 @@ export const auth = betterAuth({
   baseURL,
   // Deployed apps inject BETTER_AUTH_SECRET. Preview: process-stable secret on
   // globalThis so HMR doesn't invalidate PGLite-backed sessions (see above).
-  secret: env("BETTER_AUTH_SECRET") ?? previewAuthSecret(),
+  secret: env("BETTER_AUTH_SECRET") ?? betterAuthApiKey ?? previewAuthSecret(),
   database,
 
   // CSRF / origin check for credentialed auth POSTs (email sign-up/sign-in, …).
