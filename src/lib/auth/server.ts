@@ -30,6 +30,7 @@
  * a verified id via `@/lib/auth/middleware`.
  */
 import { betterAuth } from "better-auth";
+import { dash } from "@better-auth/infra";
 import { bearer, genericOAuth } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
@@ -227,7 +228,7 @@ export const auth = betterAuth({
 
   // Cache the session in the short-lived signed `session_data` cookie so reads
   // (incl. the client's `/get-session`) skip the DB — this shrinks the "loading"
-  // window and reduces auth flicker. See the `auth` skill for the full
+  // window and reduces auth flicker. See `auth` skill for the full
   // flicker-prevention guidance (gate on `isPending`; SSR the session).
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
@@ -253,6 +254,11 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    // Better Auth Dash — dashboard analytics, activity monitoring and
+    // infrastructure observability. The API key is read exclusively from the
+    // server environment via BETTER_AUTH_API_KEY.
+    dash({ apiKey: betterAuthApiKey }),
+
     gateIdentitySessions(),
 
     // One genericOAuth provider per upstream (when auth is on), all federating
