@@ -115,15 +115,32 @@ const baseURL = explicitBaseURL ?? {
 
 // Origins Better Auth accepts on credentialed POSTs (sign-up/sign-in, etc.).
 // Missing entries here surface as FORBIDDEN "Invalid origin".
-const trustedOrigins: string[] = explicitBaseURL
-  ? [explicitBaseURL, ...LOCAL_DEV_ORIGINS]
-  : [
-      // Host wildcards (matched against Origin's host)
-      ...previewAllowedHosts,
-      // Full-origin wildcards (matched against Origin)
-      ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
-      ...LOCAL_DEV_ORIGINS,
-    ];
+const configuredTrustedOrigins = (env("BETTER_AUTH_TRUSTED_ORIGINS") ?? "")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+const vercelOrigin = env("VERCEL_URL") ? `https://${env("VERCEL_URL")}` : undefined;
+
+const trustedOrigins: string[] = Array.from(
+  new Set(
+    explicitBaseURL
+      ? [
+          explicitBaseURL.replace(/\/$/, ""),
+          ...(vercelOrigin ? [vercelOrigin] : []),
+          ...configuredTrustedOrigins,
+          ...LOCAL_DEV_ORIGINS,
+        ]
+      : [
+          // Host wildcards (matched against Origin's host)
+          ...previewAllowedHosts,
+          // Full-origin wildcards (matched against Origin)
+          ...previewAllowedHosts.flatMap((host) => [`https://${host}`, `http://${host}`]),
+          ...(vercelOrigin ? [vercelOrigin] : []),
+          ...configuredTrustedOrigins,
+          ...LOCAL_DEV_ORIGINS,
+        ],
+  ),
+);
 
 const databaseUrl = env("DATABASE_URL");
 
