@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Serif", "Iowan Old Style", Georgia, serif;
+
+  --color-bg: #f3efe8;
+  --color-surface: #faf7f2;
+  --color-raised: #fffdf9;
+  --color-wash: #ebe4d8;
+  --color-ink: #1b1d24;
+  --color-muted: #6e685f;
+  --color-subtle: #8c857b;
+  --color-line: #ddd4c6;
+  --color-denim: #2a4a62;
+  --color-denim-fg: #f6f3ee;
+  --color-sage: #3d5c4e;
+  --color-amber: #8a5a22;
+  --color-brick: #8f3d3d;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+
+  --shadow-card: 0 0 0 1px rgb(27 29 36 / 0.06), 0 1px 2px rgb(27 29 36 / 0.04),
+    0 8px 20px rgb(27 29 36 / 0.04);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss03" 0, "kern" 1;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: -0.011em;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.stitch {
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-line) 0 7px,
+    transparent 7px 13px
+  );
+}
+
+.tab-hit {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
