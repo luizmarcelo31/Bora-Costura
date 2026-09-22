@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
+import { authEnabled, signInWithGoogle } from "@/lib/auth/client";
 import { LogoMark } from "@/components/shell";
 import { Button, Field, Input } from "@/components/ui";
+import { getSupabaseBrowserClient } from "@/lib/auth/supabase-client";
 
 export function LoginScreen() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -15,21 +16,23 @@ export function LoginScreen() {
     e.preventDefault();
     setError(null);
     setBusy(true);
+    const supabase = getSupabaseBrowserClient();
     try {
       if (mode === "signup") {
-        const { error: err } = await authClient.signUp.email({
+        const { error: err } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          name: name.trim() || email.trim(),
+          options: { data: { full_name: name.trim() || email.trim() } },
         });
-        if (err) throw new Error(err.message ?? "Não foi possível criar a conta.");
+        if (err) throw new Error(err.message ?? "Nao foi possivel criar a conta.");
       } else {
-        const { error: err } = await authClient.signIn.email({
+        const { error: err } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
-        if (err) throw new Error(err.message ?? "E-mail ou senha inválidos.");
+        if (err) throw new Error(err.message ?? "E-mail ou senha invalidos.");
       }
+      window.location.href = "/";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha no acesso.");
     } finally {
@@ -45,28 +48,25 @@ export function LoginScreen() {
           <div>
             <p className="font-display text-[1.65rem] leading-none text-ink">Linha</p>
             <p className="mt-1 text-[12px] font-medium uppercase tracking-[0.16em] text-muted">
-              Confecção
+              Confeccao
             </p>
           </div>
         </div>
         <h1 className="text-[1.75rem] font-semibold tracking-tight text-ink">Entrar na oficina</h1>
         <p className="mt-2 text-[15px] leading-6 text-muted">
-          Pedidos, produção e caixa no mesmo lugar — com a sua conta.
+          Pedidos, producao e caixa no mesmo lugar — com a sua conta.
         </p>
 
         {authEnabled ? (
           <div className="mt-7 flex flex-col gap-2">
-            {GROK_PROVIDERS.map((p) => (
-              <Button
-                key={p.providerId}
-                type="button"
-                variant="secondary"
-                className="w-full"
-                onClick={() => signIn(p.providerId, { callbackURL: "/" })}
-              >
-                Continuar com {p.label}
-              </Button>
-            ))}
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full"
+              onClick={() => signInWithGoogle()}
+            >
+              Continuar com Google
+            </Button>
           </div>
         ) : (
           <p className="mt-6 text-sm text-muted">Acesso desativado neste ambiente.</p>
@@ -80,11 +80,11 @@ export function LoginScreen() {
 
         <form className="flex flex-col gap-3" onSubmit={onEmail}>
           {mode === "signup" ? (
-            <Field label="Nome do ateliê">
+            <Field label="Nome do atelie">
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ateliê Linha"
+                placeholder="Atelie Linha"
                 autoComplete="organization"
               />
             </Field>
@@ -104,7 +104,7 @@ export function LoginScreen() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Minimo 8 caracteres"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               minLength={8}
               required
@@ -112,7 +112,7 @@ export function LoginScreen() {
           </Field>
           {error ? <p className="text-sm text-brick">{error}</p> : null}
           <Button type="submit" className="mt-1 w-full" disabled={busy}>
-            {busy ? "Aguarde…" : mode === "signup" ? "Criar conta" : "Entrar"}
+            {busy ? "Aguarde..." : mode === "signup" ? "Criar conta" : "Entrar"}
           </Button>
         </form>
 
@@ -124,7 +124,7 @@ export function LoginScreen() {
             setError(null);
           }}
         >
-          {mode === "signin" ? "Não tem conta? Criar agora" : "Já tem conta? Entrar"}
+          {mode === "signin" ? "Nao tem conta? Criar agora" : "Ja tem conta? Entrar"}
         </button>
       </div>
     </main>
